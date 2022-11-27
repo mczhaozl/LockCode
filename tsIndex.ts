@@ -1,4 +1,5 @@
 const fs = require('fs-extra')
+const NODE_ENV = process.env.NODE_ENV as string
 const path = require('path')
 type Tconfig = {
     // 'replace' 取代被篡改的代码 'manual' 仅报错需要手动替换
@@ -14,7 +15,9 @@ type Tconfig = {
     manualCallback?: (path: string, lock: Buffer) => void | never,
     // 自动对比出错的回调
     replaceCallback?: (path: string, lock: Buffer) => void | never,
+    checkEnvironment?: Array<string> | ((env: string) => Boolean)
 }
+type Tmodify = (prototype: Object, key: string, desc: PropertyDescriptor | undefined) => PropertyDescriptor
 type TRequireConfig = Required<Tconfig>
 interface IStirngMap {
     [p: string]: string
@@ -22,12 +25,15 @@ interface IStirngMap {
 export default function CreateLockCode(setting: Tconfig | undefined) {
     const config = [formatSetting, formatPathMap].reduce((per, cur) => cur(per), setting) as TRequireConfig
     class LockCode {
+        @LimitEnvironment(config.checkEnvironment)
         apply(compiler: any) {
             compiler.hooks.emit.callAsync(config.name, async () => {
                 return check(config)
             })
         }
     }
+    // 如果不支持装饰器 可以使用以下代码
+    // decoratorsPollfill(LockCode.prototype,'apply',LimitEnvironment(config.checkEnvironment))
     return LockCode
 }
 function formatSetting(setting: Tconfig | undefined): TRequireConfig {
@@ -101,4 +107,26 @@ function createFileHandle(mode: TRequireConfig['mode'], callback: TRequireConfig
             })
         })
     }
+}
+
+function LimitEnvironment(rules: TRequireConfig['checkEnvironment']) {
+    return function (target, name, descriptor) {
+        const empty = { ...descriptor, value() { } }
+        if (typeof rules === 'function' && !rules(NODE_ENV)) {
+            return empty
+        }
+        if (typeof rules === 'string' && rules !== NODE_ENV) {
+            return empty
+        }
+        if (Array.isArray(rules) && !rules.includes(NODE_ENV)) {
+            return empty
+        }
+        return descriptor
+    }
+}
+/**
+ * 不支持 装饰器可以使用本代码
+ */
+function decoratorsPollfill(prototype: Object, key: string, desc: PropertyDescriptor, modifyer: Tmodify) {
+    return Object.defineProperty(prototype, key, modifyer(prototype, key, Object.getOwnPropertyDescriptor(prototype, key)))
 }

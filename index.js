@@ -1,14 +1,17 @@
 const fs = require('fs-extra')
 const path = require('path')
-export default  function CreateLockCode(setting) {
+export default function CreateLockCode(setting) {
     const config = [formatSetting, formatPathMap].reduce((per, cur) => cur(per), setting)
     class LockCode {
+        // @LimitEnvironment(config.checkEnvironment)
         apply(compiler) {
             compiler.hooks.emit.callAsync(config.name, async () => {
                 return check(config)
             })
         }
     }
+    // 如果不支持装饰器 可以使用以下代码
+    decoratorsPollfill(LockCode.prototype,'apply',LimitEnvironment(config.checkEnvironment))
     return LockCode
 }
 function formatSetting(setting) {
@@ -23,7 +26,7 @@ function formatSetting(setting) {
         },
         replaceCallback(filePath, lock) {
             fs.writeFile(filePath, lock)
-            console.warn(filePath,'已经自动修复了')
+            console.warn(filePath, '已经自动修复了')
             return filePath
         }
     }
@@ -82,4 +85,25 @@ function createFileHandle(mode, callback) {
             })
         })
     }
+}
+function LimitEnvironment(rules) {
+    return function (target, name, descriptor) {
+        const empty = { ...descriptor, value() { } }
+        if (typeof rules === 'function' && !rules(NODE_ENV)) {
+            return empty
+        }
+        if (typeof rules === 'string' && rules !== NODE_ENV) {
+            return empty
+        }
+        if (Array.isArray(rules) && !rules.includes(NODE_ENV)) {
+            return empty
+        }
+        return descriptor
+    }
+}
+/**
+ * 不支持 装饰器可以使用本代码
+ */
+function decoratorsPollfill(prototype, key, desc, modifyer) {
+    return Object.defineProperty(prototype, key, modifyer(prototype, key, Object.getOwnPropertyDescriptor(prototype, key)))
 }
