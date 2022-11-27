@@ -1,0 +1,22 @@
+{
+  "name": "lockcode",
+  "version": "1.0.0",
+  "description": "a webpack plugin while cloud help you find file that had been modify by careless.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mczhaozl/LockCode.git"
+  },
+  "keywords": [
+    "lockCode"
+  ],
+  "author": "mczhaozl",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mczhaozl/LockCode/issues"
+  },
+  "homepage": "https://github.com/mczhaozl/LockCode#readme"
+}
