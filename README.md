@@ -7,3 +7,6 @@
       1. 提交代码的时候一次提交多个文件，导致code review的时候难以发现
       2. 打包的之后，测试不可能说每次都把所有的权限都测试一遍
    2. 开发过程中临时使用fake假数据，打包上线的时候可以自动重置相关代码。
+4. 我如何使用这套插件
+    [demo.js](https://github.com/mczhaozl/LockCode/demo)<br />
+   
