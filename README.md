@@ -9,4 +9,7 @@
    2. 开发过程中临时使用fake假数据，打包上线的时候可以自动重置相关代码。
 4. 我如何使用这套插件
     [demo.js](https://github.com/mczhaozl/LockCode/demo)<br />
-   
+5. 插件集有哪些，是否还有其它的插件<br />
+   1. [版本记录器](https://github.com/mczhaozl/VersionRecord)<br />
+   2. [代码片段校验器](https://github.com/mczhaozl/CreateCheckFragment)<br />
+   3. [代码防篡改](https://github.com/mczhaozl/LockCode)<br />
